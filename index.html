@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ThumbDeck</title>
+<meta name="description" content="Rewind, skip and change volume in Reels and Shorts with one thumb. ThumbDeck for Android. Free for 7 days on Google Play.">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="assets/thumbdeck-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@700&display=swap">
+<style>
+:root{
+  --bg:#0b0b0d;--surface:#131316;--raised:#1b1b20;
+  --ink:#f5f5f7;--muted:#acacae;--faint:#919193;
+  --glass:rgba(255,255,255,.06);--edge:rgba(255,255,255,.11);--strong:rgba(255,255,255,.14);
+  --glow:#ffa85c;--ember:#ff7a59;--on-glow:#0b0b0d;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --display:"Inter Tight","Inter",system-ui,sans-serif;
+  --gutter:max(20px,env(safe-area-inset-left,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+img{max-width:100%;display:block}
+:focus-visible{outline:2px solid var(--glow);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:var(--gutter);padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.03em;margin:0;text-wrap:balance}
+.eyebrow{font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.muted{color:var(--muted)}
+
+/* ground: two slow drifting lights */
+.ground{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.ground i{position:absolute;border-radius:50%;filter:blur(40px)}
+.ground .a{width:720px;height:720px;left:-220px;top:-260px;background:radial-gradient(circle,rgba(196,196,208,.16),transparent 65%);animation:drift 26s var(--ease) infinite alternate}
+.ground .b{width:820px;height:820px;right:-300px;top:45%;background:radial-gradient(circle,rgba(120,120,136,.14),transparent 65%);animation:drift 30s var(--ease) infinite alternate-reverse}
+@keyframes drift{to{transform:translate(60px,50px)}}
+
+/* nav */
+nav{position:sticky;top:0;z-index:20;padding-top:env(safe-area-inset-top,0px)}
+nav .bar{margin-top:14px;display:flex;align-items:center;gap:20px;padding:10px 10px 10px 18px;border-radius:999px;background:rgba(19,19,22,.55);border:1px solid var(--edge);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%)}
+nav .logo img{height:30px;width:auto}
+nav .links{display:flex;gap:22px;margin-left:auto;font-size:15px;color:var(--muted)}
+nav .links a{text-decoration:none;transition:color .3s}
+nav .links a:hover{color:var(--ink)}
+@media(max-width:640px){nav .links{display:none}nav .bar .btn{margin-left:auto}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px;border-radius:999px;font-weight:600;font-size:16px;text-decoration:none;transition:transform .4s var(--ease),box-shadow .4s var(--ease)}
+.btn:hover{transform:translateY(-2px)}
+.btn-glow{background:var(--glow);color:var(--on-glow);box-shadow:0 0 48px rgba(255,168,92,.35)}
+.btn-glow:hover{box-shadow:0 0 72px rgba(255,168,92,.5)}
+.btn-sm{min-height:42px;padding:0 18px;font-size:15px}
+/* Placeholder for Google's official "Get it on Google Play" badge (swap in the official artwork before launch) */
+.play{display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 22px 0 18px;border-radius:14px;background:#000;border:1px solid rgba(255,255,255,.28);text-decoration:none;transition:transform .4s var(--ease)}
+.play:hover{transform:translateY(-2px)}
+.play svg{width:26px;height:28px;flex:none}
+.play span{display:flex;flex-direction:column;line-height:1.1}
+.play small{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#ddd}
+.play b{font-size:20px;font-weight:600}
+
+/* glass */
+.glass{background:var(--glass);border:1px solid var(--edge);border-radius:26px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 18px 48px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(-10px);filter:blur(10px);transition:opacity 1.2s var(--ease),transform 1.2s var(--ease),filter 1.2s var(--ease)}
+.rv.in{opacity:1;transform:none;filter:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* hero */
+.hero{padding-block:72px 40px;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(46px,7vw,84px);line-height:.98;margin-top:14px}
+.hero p.lead{font-size:clamp(18px,2vw,21px);color:var(--muted);max-width:30ch;margin:22px 0 32px}
+.hero .cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.hero .note{font-size:14px;color:var(--faint)}
+@media(max-width:880px){.hero{grid-template-columns:1fr;padding-top:48px}}
+
+/* phone */
+.stage{position:relative;display:flex;justify-content:center}
+.stage .orb{position:absolute;width:560px;height:560px;left:50%;top:58%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,168,92,.55),rgba(255,122,89,.18) 45%,transparent 70%);filter:blur(10px);animation:breathe 6s var(--ease) infinite alternate;max-width:140vw}
+@keyframes breathe{to{transform:translate(-50%,-50%) scale(1.08);opacity:.85}}
+.phone{position:relative;width:300px;max-width:78vw;aspect-ratio:9/19;border-radius:46px;padding:12px;background:linear-gradient(160deg,#2a2a30,#0e0e11);border:1px solid var(--strong);box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.screen{position:relative;width:100%;height:100%;border-radius:36px;overflow:hidden;background:linear-gradient(170deg,#2b2730 0%,#1a1820 40%,#3a2a24 100%)}
+.screen .shot{position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 30%,rgba(255,190,140,.25),transparent 60%),radial-gradient(90% 60% at 80% 70%,rgba(140,150,255,.18),transparent 60%)}
+.screen .lines{position:absolute;left:18px;right:70px;bottom:78px;display:grid;gap:8px}
+.screen .lines i{display:block;height:9px;border-radius:5px;background:rgba(255,255,255,.22)}
+.screen .lines i:nth-child(2){width:70%}
+.seek{position:absolute;left:18px;right:18px;bottom:46px;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}
+.seek b{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:#fff;animation:seek 8s linear infinite}
+.seek b::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;border-radius:50%;background:#fff}
+@keyframes seek{0%{width:30%}22%{width:52%}30%{width:34%}48%{width:34%}58%{width:56%}66%{width:76%}100%{width:96%}}
+.pad{position:absolute;right:14px;top:47%;width:140px;height:47px}
+.pad svg{width:100%;height:100%;filter:drop-shadow(0 12px 18px rgba(0,0,0,.45))}
+.pad .z{fill:#fff;fill-opacity:0}
+.pad .zl{animation:zl 8s infinite}.pad .zr{animation:zr 8s infinite}
+@keyframes zl{22%,30%{fill-opacity:.2}0%,21%,31%,100%{fill-opacity:0}}
+@keyframes zr{50%,66%{fill-opacity:.2}0%,49%,67%,100%{fill-opacity:0}}
+
+/* sections */
+section{padding-block:88px}
+.head{max-width:640px;margin-bottom:44px}
+.head h2{font-size:clamp(34px,4.6vw,52px);line-height:1.04;margin-top:12px}
+.head p{color:var(--muted);margin:16px 0 0}
+
+/* proof */
+.proof{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.proof .card{padding:26px;display:flex;flex-direction:column;gap:18px}
+.proof .vid{aspect-ratio:9/16;max-height:520px;border-radius:20px;border:1px dashed var(--strong);display:grid;place-items:center;text-align:center;color:var(--faint);font-size:14px;padding:24px;background:rgba(0,0,0,.25)}
+.proof h3{font-size:24px}
+@media(max-width:760px){.proof{grid-template-columns:1fr}}
+
+/* features */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.feat{padding:30px;transition:transform .6s var(--ease),border-color .6s var(--ease)}
+.feat:hover{transform:translateY(-4px);border-color:var(--strong)}
+.feat .ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--glass);border:1px solid var(--edge);margin-bottom:22px}
+.feat .ico svg{width:30px;height:30px}
+.feat h3{font-size:24px;margin-bottom:8px}
+.feat p{margin:0;color:var(--muted)}
+.apps{margin-top:20px;padding:22px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;color:var(--muted)}
+.apps b{color:var(--ink);font-weight:600}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+
+/* modes */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.mode{padding:32px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.mode .art{height:120px;display:flex;align-items:center}
+@media(max-width:760px){.modes{grid-template-columns:1fr}}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;counter-reset:s}
+.step{padding:28px}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--glow);color:var(--on-glow);font-weight:600;font-size:15px;margin-bottom:18px}
+.step h3{font-size:21px;margin-bottom:6px}
+.step p{margin:0;color:var(--muted);font-size:16px}
+@media(max-width:760px){.steps{grid-template-columns:1fr}}
+.trust{margin-top:20px;padding:22px 28px;display:flex;gap:16px;align-items:center;color:var(--muted)}
+.trust svg{flex:none;width:28px;height:28px}
+
+/* pricing */
+.prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
+.price{padding:30px;display:flex;flex-direction:column;gap:8px;position:relative}
+.price.best{border-color:rgba(255,168,92,.75);box-shadow:0 0 96px rgba(255,168,92,.18),0 18px 48px rgba(0,0,0,.45)}
+.price .tag{position:absolute;top:-13px;left:28px;background:var(--glow);color:var(--on-glow);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px}
+.price h3{font-size:22px}
+.price .amt{font-family:var(--display);font-size:48px;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:8px}
+.price .amt s{font-size:20px;color:var(--faint);font-weight:500;margin-right:8px}
+.price .amt small{font-size:16px;color:var(--muted);font-family:var(--sans);font-weight:500;letter-spacing:0}
+.price p{margin:0;color:var(--muted);font-size:15px}
+.price ul{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px;font-size:15px}
+.price li::before{content:"\2713";color:var(--glow);margin-right:10px;font-weight:600}
+.pnote{margin-top:22px;color:var(--faint);font-size:14px;text-align:center}
+@media(max-width:880px){.prices{grid-template-columns:1fr}}
+
+/* faq */
+.faq{display:grid;gap:12px;max-width:760px}
+details{padding:20px 24px}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--faint);transition:transform .4s var(--ease)}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin:12px 0 0;color:var(--muted)}
+
+/* final */
+.final{text-align:center;padding:64px 28px;position:relative;overflow:hidden}
+.final::before{content:"";position:absolute;width:640px;height:640px;left:50%;top:100%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,168,92,.45),transparent 65%);pointer-events:none}
+.final h2{font-size:clamp(36px,5vw,60px);position:relative}
+.final p{position:relative;color:var(--muted);margin:14px 0 28px}
+.final .cta{position:relative;display:flex;justify-content:center;flex-wrap:wrap;gap:16px;align-items:center}
+
+footer{padding-block:48px calc(48px + env(safe-area-inset-bottom,0px));color:var(--faint);font-size:14px}
+footer .row{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center}
+footer a{text-decoration:none}
+footer a:hover{color:var(--ink)}
+footer .sp{margin-left:auto}
+@media(max-width:640px){footer .sp{margin-left:0}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none;filter:none}
+}
+</style>
+</head>
+<body>
+<div class="ground" aria-hidden="true"><i class="a"></i><i class="b"></i></div>
+
+<nav>
+  <div class="wrap">
+    <div class="bar">
+      <a class="logo" href="#top" aria-label="ThumbDeck home"><img src="assets/thumbdeck-lockup-white.svg" alt="ThumbDeck"></a>
+      <div class="links"><a href="#how">How it works</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
+      <a class="btn btn-glow btn-sm" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dnav">Get the app</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <div class="eyebrow rv">For Android</div>
+      <h1 class="rv d1">One thumb.<br>Every video.</h1>
+      <p class="lead rv d2">Rewind, skip and change volume in Reels and Shorts without letting go of your phone.</p>
+      <div class="cta rv d3">
+        <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dhero" aria-label="Get it on Google Play">
+          <svg viewBox="0 0 26 28" aria-hidden="true"><path d="M5 3.5v21l18-10.5L5 3.5Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span><small>Get it on</small><b>Google Play</b></span>
+        </a>
+        <span class="note">Free for 7 days. Volume free forever.</span>
+      </div>
+    </div>
+    <div class="stage rv d2" aria-hidden="true">
+      <div class="orb"></div>
+      <div class="phone"><div class="screen">
+        <div class="shot"></div>
+        <div class="pad"><svg viewBox="14 64 172 72"><clipPath id="pc"><rect x="22" y="72" width="156" height="56" rx="28"/></clipPath><rect x="22" y="72" width="156" height="56" rx="28" fill="#101012" fill-opacity=".62" stroke="#fff" stroke-opacity=".33" stroke-width="1.4"/><g clip-path="url(#pc)"><rect class="z zl" x="22" y="72" width="52" height="56"/><rect class="z zr" x="126" y="72" width="52" height="56"/></g><path d="M74,82 L74,118 M126,82 L126,118" stroke="#fff" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/><path d="M52,88 L42,100 L52,112 M64,88 L54,100 L64,112 M93,92 L100,84 L107,92 M93,108 L100,116 L107,108 M136,88 L146,100 L136,112 M148,88 L158,100 L148,112" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="lines"><i></i><i></i></div>
+        <div class="seek"><b></b></div>
+      </div></div>
+    </div>
+  </div>
+
+  <section id="proof">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">See it work</div>
+        <h2 class="rv d1">Missed the moment? Go back.</h2>
+        <p class="rv d2">Real recordings of ThumbDeck on a real phone, in the apps you already scroll.</p>
+      </div>
+      <div class="proof">
+        <div class="card glass rv">
+          <div class="vid">Screen recording: the control pad rewinding a reel</div>
+          <h3>Hold to rewind</h3>
+          <p class="muted" style="margin:0">Hold the left side to go back, the right side to skip ahead. Let go to keep watching.</p>
+        </div>
+        <div class="card glass rv d1">
+          <div class="vid">Screen recording: the slide handle scrubbing a long video</div>
+          <h3>Slide to scrub</h3>
+          <p class="muted" style="margin:0">Press the handle and slide to land on the exact moment.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">Features</div>
+        <h2 class="rv d1">Everything your thumb needs.</h2>
+      </div>
+      <div class="grid">
+        <div class="feat glass rv"><div class="ico"><svg viewBox="0 0 30 30" fill="none" stroke="#f5f5f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 9 7 15l6 6M21 9l-6 6 6 6"/></svg></div><h3>Rewind and skip</h3><p>Hold to go back or forward. The longer you hold, the faster it goes.</p></div>
+        <div class="feat glass rv d1"><div class="ico"><svg viewBox="0 0 30 30" fill="none" stroke="#f5f5f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15h20"/><circle cx="17" cy="15" r="4" fill="#ffa85c" stroke="none"/></svg></div><h3>Scrub to the second</h3><p>Slide the handle to find the exact frame, even in a long video.</p></div>
+        <div class="feat glass rv"><div class="ico"><svg viewBox="0 0 30 30" fill="none" stroke="#f5f5f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 6-6 6 6M9 18l6 6 6-6"/></svg></div><h3>Volume without buttons</h3><p>Slide up or down to turn it up or down. Free forever.</p></div>
+        <div class="feat glass rv d1"><div class="ico"><svg viewBox="0 0 30 30" fill="none" stroke="#f5f5f7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="4" width="12" height="22" rx="3"/><path d="M14 22h2"/></svg></div><h3>Out of your way</h3><p>A small glass control that sits where your thumb rests and hides outside video apps.</p></div>
+      </div>
+      <div class="apps glass rv"><span>Works in</span><b>Instagram</b><b>TikTok</b><b>X</b><b>YouTube</b><span>More apps arrive with updates.</span></div>
+    </div>
+  </section>
+
+  <section id="modes">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">Your thumb, your way</div>
+        <h2 class="rv d1">Pad or slider. Pick one.</h2>
+      </div>
+      <div class="modes">
+        <div class="mode glass rv">
+          <div class="art"><svg viewBox="14 64 172 72" width="240" height="100" aria-hidden="true"><rect x="22" y="72" width="156" height="56" rx="28" fill="#fff" fill-opacity=".1" stroke="#fff" stroke-opacity=".22" stroke-width="1.4"/><path d="M74,82 L74,118 M126,82 L126,118" stroke="#fff" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/><path d="M52,88 L42,100 L52,112 M64,88 L54,100 L64,112 M93,92 L100,84 L107,92 M93,108 L100,116 L107,108 M136,88 L146,100 L136,112 M148,88 L158,100 L148,112" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3 style="font-size:26px">Control pad</h3>
+          <p class="muted" style="margin:0">Hold left or right to rewind or skip. Slide the middle up or down for volume.</p>
+        </div>
+        <div class="mode glass rv d1">
+          <div class="art"><svg viewBox="0 0 44 100" width="53" height="120" aria-hidden="true"><rect x=".6" y=".6" width="42.8" height="98.8" rx="21.4" fill="#fff" fill-opacity=".1" stroke="#fff" stroke-opacity=".22" stroke-width="1.2"/><path d="M12.3,40 L31.7,40 M12.3,50 L31.7,50 M12.3,60 L31.7,60" stroke="#fff" stroke-opacity=".94" stroke-width="3" stroke-linecap="round"/></svg></div>
+          <h3 style="font-size:26px">Slide handle</h3>
+          <p class="muted" style="margin:0">Slide left or right to scrub. Slide up or down for volume.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">How it works</div>
+        <h2 class="rv d1">Set up in a minute.</h2>
+      </div>
+      <div class="steps">
+        <div class="step glass rv"><h3>Install</h3><p>Get ThumbDeck free from Google Play.</p></div>
+        <div class="step glass rv d1"><h3>Switch it on</h3><p>The app walks you through turning on ThumbDeck in Accessibility.</p></div>
+        <div class="step glass rv d2"><h3>Open a video</h3><p>The control appears in your video apps. Rest your thumb and go.</p></div>
+      </div>
+      <div class="trust glass rv"><svg viewBox="0 0 28 28" fill="none" stroke="#ffa85c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3 5 7v6c0 6 4 10 9 12 5-2 9-6 9-12V7l-9-4Z"/><path d="m10 14 3 3 5-6"/></svg><span>ThumbDeck never records or sends your screen. It only finds the video's progress bar so your thumb can move it.</span></div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">Pricing</div>
+        <h2 class="rv d1">Try everything free for 7 days.</h2>
+        <p class="rv d2">Then keep rewind and skip with a plan that suits you. Volume stays free.</p>
+      </div>
+      <div class="prices">
+        <div class="price glass best rv">
+          <span class="tag">Launch price</span>
+          <h3>Lifetime</h3>
+          <div class="amt"><s>US$14.99</s>US$9.99</div>
+          <p>Pay once. All paid features, forever.</p>
+          <ul><li>No subscription</li><li>Every future update</li></ul>
+        </div>
+        <div class="price glass rv d1">
+          <span class="tag">Save 75%</span>
+          <h3>Yearly</h3>
+          <div class="amt">US$5.99<small> / year</small></div>
+          <p>Billed once a year.</p>
+          <ul><li>All paid features</li><li>Cancel any time</li></ul>
+        </div>
+        <div class="price glass rv d2">
+          <h3>Monthly</h3>
+          <div class="amt">US$1.99<small> / month</small></div>
+          <p>Cancel any time.</p>
+          <ul><li>All paid features</li><li>Cancel in Google Play</li></ul>
+        </div>
+      </div>
+      <p class="pnote">Google Play shows the price in your own currency.</p>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="head"><div class="eyebrow rv">Questions</div><h2 class="rv d1">Good to know.</h2></div>
+      <div class="faq">
+        <details class="glass rv"><summary>Does it work on iPhone?</summary><p>Sorry, Apple users. ThumbDeck only works on Android.</p></details>
+        <details class="glass rv"><summary>Why does it need Accessibility?</summary><p>Android's Accessibility service is what lets ThumbDeck find a video's progress bar and move it for you. ThumbDeck uses it only in the video apps it supports, and never records or sends your screen.</p></details>
+        <details class="glass rv"><summary>What happens after the free trial?</summary><p>Volume keeps working for free. Rewind and skip need a plan. Nothing is charged automatically when the trial ends.</p></details>
+        <details class="glass rv"><summary>I changed phones. How do I get my purchase back?</summary><p>Install ThumbDeck with the same Google account, open the plans screen and tap Restore purchase.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:24px">
+    <div class="wrap">
+      <div class="final glass rv">
+        <h2>Android can rewind.</h2>
+        <p>Free for 7 days on Google Play.</p>
+        <div class="cta">
+          <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dfooter" aria-label="Get it on Google Play">
+            <svg viewBox="0 0 26 28" aria-hidden="true"><path d="M5 3.5v21l18-10.5L5 3.5Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span><small>Get it on</small><b>Google Play</b></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <img src="assets/thumbdeck-mark.svg" alt="" width="28" height="28">
+    <span>&copy; 2026 ThumbDeck</span>
+    <a href="https://www.instagram.com/thumbdeckapp/">Instagram</a>
+    <span>Support: <span style="color:var(--muted);user-select:all">thumbdeckapp@gmail.com</span></span>
+    <a class="sp" href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
+  },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  els.forEach(function(e){io.observe(e)});
+})();
+</script>
+</body>
+</html>
