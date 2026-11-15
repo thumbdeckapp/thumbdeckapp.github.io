@@ -54,13 +54,10 @@ nav .links a:hover{color:var(--ink)}
 .btn-glow{background:var(--glow);color:var(--on-glow);box-shadow:0 0 48px rgba(255,168,92,.35)}
 .btn-glow:hover{box-shadow:0 0 72px rgba(255,168,92,.5)}
 .btn-sm{min-height:42px;padding:0 18px;font-size:15px}
-/* Placeholder for Google's official "Get it on Google Play" badge (swap in the official artwork before launch) */
-.play{display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 22px 0 18px;border-radius:14px;background:#000;border:1px solid rgba(255,255,255,.28);text-decoration:none;transition:transform .4s var(--ease)}
+/* Google's official badge artwork, unaltered */
+.play{display:inline-block;line-height:0;border-radius:10px;transition:transform .4s var(--ease)}
 .play:hover{transform:translateY(-2px)}
-.play svg{width:26px;height:28px;flex:none}
-.play span{display:flex;flex-direction:column;line-height:1.1}
-.play small{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#ddd}
-.play b{font-size:20px;font-weight:600}
+.play img{height:60px;width:auto}
 
 /* glass */
 .glass{background:var(--glass);border:1px solid var(--edge);border-radius:26px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 18px 48px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08)}
@@ -204,10 +201,7 @@ footer .sp{margin-left:auto}
       <h1 class="rv d1">One thumb.<br>Every video.</h1>
       <p class="lead rv d2">Rewind, skip and change volume in Reels and Shorts without letting go of your phone.</p>
       <div class="cta rv d3">
-        <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dhero" aria-label="Get it on Google Play">
-          <svg viewBox="0 0 26 28" aria-hidden="true"><path d="M5 3.5v21l18-10.5L5 3.5Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
-          <span><small>Get it on</small><b>Google Play</b></span>
-        </a>
+        <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dhero" aria-label="Get it on Google Play"><img src="assets/google-play-badge.png" alt="Get it on Google Play" width="202" height="60"></a>
         <span class="note">Free for 7 days. Volume free forever.</span>
       </div>
     </div>
@@ -347,10 +341,7 @@ footer .sp{margin-left:auto}
         <h2>Android can rewind.</h2>
         <p>Free for 7 days on Google Play.</p>
         <div class="cta">
-          <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dfooter" aria-label="Get it on Google Play">
-            <svg viewBox="0 0 26 28" aria-hidden="true"><path d="M5 3.5v21l18-10.5L5 3.5Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
-            <span><small>Get it on</small><b>Google Play</b></span>
-          </a>
+          <a class="play" href="https://play.google.com/store/apps/details?id=com.thumbdeck.app&amp;referrer=utm_source%3Dwebsite%26utm_medium%3Dfooter" aria-label="Get it on Google Play"><img src="assets/google-play-badge.png" alt="Get it on Google Play" width="202" height="60"></a>
         </div>
       </div>
     </div>
