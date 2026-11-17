@@ -105,7 +105,9 @@ section{padding-block:88px}
 /* proof */
 .proof{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .proof .card{padding:26px;display:flex;flex-direction:column;gap:18px}
-.proof .vid{aspect-ratio:9/16;max-height:520px;border-radius:20px;border:1px dashed var(--strong);display:grid;place-items:center;text-align:center;color:var(--faint);font-size:14px;padding:24px;background:rgba(0,0,0,.25)}
+.proof .vid{display:block;width:100%;max-width:300px;aspect-ratio:540/1048;margin:0 auto;border-radius:22px;border:1px solid var(--edge);background:#000;object-fit:cover}
+.trailer{padding:14px;border-radius:30px}
+.trailer video{display:block;width:100%;aspect-ratio:16/9;border-radius:20px;background:#000}
 .proof h3{font-size:24px}
 @media(max-width:760px){.proof{grid-template-columns:1fr}}
 
@@ -216,21 +218,31 @@ footer .sp{margin-left:auto}
     </div>
   </div>
 
+  <section id="trailer" style="padding-top:32px">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow rv">Watch</div>
+        <h2 class="rv d1">ThumbDeck in 30 seconds.</h2>
+      </div>
+      <div class="trailer glass rv"><video src="media/trailer-web.mp4" poster="media/trailer-poster.jpg" controls playsinline preload="metadata" aria-label="ThumbDeck trailer"></video></div>
+    </div>
+  </section>
+
   <section id="proof">
     <div class="wrap">
       <div class="head">
         <div class="eyebrow rv">See it work</div>
         <h2 class="rv d1">Missed the moment? Go back.</h2>
-        <p class="rv d2">Real recordings of ThumbDeck on a real phone, in the apps you already scroll.</p>
+        <p class="rv d2">Real recordings of ThumbDeck on a real phone. Other people's videos are blurred.</p>
       </div>
       <div class="proof">
         <div class="card glass rv">
-          <div class="vid">Screen recording: the control pad rewinding a reel</div>
+          <video class="vid" src="media/clip-pad.mp4" poster="media/clip-pad.jpg" autoplay muted loop playsinline aria-label="ThumbDeck control pad skipping through a video"></video>
           <h3>Hold to rewind</h3>
           <p class="muted" style="margin:0">Hold the left side to go back, the right side to skip ahead. Let go to keep watching.</p>
         </div>
         <div class="card glass rv d1">
-          <div class="vid">Screen recording: the slide handle scrubbing a long video</div>
+          <video class="vid" src="media/clip-handle.mp4" poster="media/clip-handle.jpg" autoplay muted loop playsinline aria-label="ThumbDeck slide handle scrubbing a video"></video>
           <h3>Slide to scrub</h3>
           <p class="muted" style="margin:0">Press the handle and slide to land on the exact moment.</p>
         </div>
